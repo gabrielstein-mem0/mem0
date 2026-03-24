@@ -8,12 +8,20 @@ import (
 )
 
 type Memory struct {
-	ID        string         `json:"id"`
-	Memory    string         `json:"memory"`
-	UserID    string         `json:"user_id"`
-	CreatedAt string         `json:"created_at"`
-	UpdatedAt string         `json:"updated_at"`
-	Metadata  map[string]any `json:"metadata,omitempty"`
+	ID         string         `json:"id"`
+	Memory     string         `json:"memory"`
+	UserID     string         `json:"user_id"`
+	CreatedAt  string         `json:"created_at"`
+	UpdatedAt  string         `json:"updated_at"`
+	Metadata   map[string]any `json:"metadata,omitempty"`
+	Categories []string       `json:"categories,omitempty"`
+	Score      float64        `json:"score,omitempty"`
+}
+
+type AddResult struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
+	EventID string `json:"event_id"`
 }
 
 type Entity struct {
@@ -22,7 +30,7 @@ type Entity struct {
 	Name string `json:"name"`
 }
 
-func (c *Client) AddMemory(text, userID string) (*Memory, error) {
+func (c *Client) AddMemory(text, userID string) (*AddResult, error) {
 	body := map[string]any{
 		"messages": []map[string]string{
 			{"role": "user", "content": text},
@@ -37,16 +45,14 @@ func (c *Client) AddMemory(text, userID string) (*Memory, error) {
 		return nil, err
 	}
 
-	var result struct {
-		Results []Memory `json:"results"`
-	}
-	if err := json.Unmarshal(resp, &result); err != nil {
+	var results []AddResult
+	if err := json.Unmarshal(resp, &results); err != nil {
 		return nil, fmt.Errorf("parsing response: %w", err)
 	}
-	if len(result.Results) == 0 {
-		return nil, fmt.Errorf("no memory returned from API")
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no result returned from API")
 	}
-	return &result.Results[0], nil
+	return &results[0], nil
 }
 
 func (c *Client) SearchMemories(query string, userID string, limit int) ([]Memory, error) {
@@ -63,13 +69,11 @@ func (c *Client) SearchMemories(query string, userID string, limit int) ([]Memor
 		return nil, err
 	}
 
-	var result struct {
-		Results []Memory `json:"results"`
-	}
-	if err := json.Unmarshal(resp, &result); err != nil {
+	var memories []Memory
+	if err := json.Unmarshal(resp, &memories); err != nil {
 		return nil, fmt.Errorf("parsing response: %w", err)
 	}
-	return result.Results, nil
+	return memories, nil
 }
 
 func (c *Client) ListMemories(userID string, limit, page int) ([]Memory, error) {
@@ -80,7 +84,7 @@ func (c *Client) ListMemories(userID string, limit, page int) ([]Memory, error) 
 	if limit > 0 {
 		params.Set("page_size", strconv.Itoa(limit))
 	}
-	if page > 0 {
+	if page > 1 {
 		params.Set("page", strconv.Itoa(page))
 	}
 
@@ -94,13 +98,19 @@ func (c *Client) ListMemories(userID string, limit, page int) ([]Memory, error) 
 		return nil, err
 	}
 
-	var result struct {
+	// API returns a plain array without page param, paginated object with it.
+	var memories []Memory
+	if err := json.Unmarshal(resp, &memories); err == nil {
+		return memories, nil
+	}
+
+	var paginated struct {
 		Results []Memory `json:"results"`
 	}
-	if err := json.Unmarshal(resp, &result); err != nil {
+	if err := json.Unmarshal(resp, &paginated); err != nil {
 		return nil, fmt.Errorf("parsing response: %w", err)
 	}
-	return result.Results, nil
+	return paginated.Results, nil
 }
 
 func (c *Client) GetMemory(id string) (*Memory, error) {

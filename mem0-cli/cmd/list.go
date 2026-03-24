@@ -28,6 +28,6 @@ func NewListCmd() *cobra.Command {
 	}
 
 	cmd.Flags().Int("limit", 20, "Number of memories per page")
-	cmd.Flags().Int("page", 1, "Page number")
+	cmd.Flags().Int("page", 0, "Page number (enables pagination when set)")
 	return cmd
 }

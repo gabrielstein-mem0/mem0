@@ -36,7 +36,7 @@ func NewPrinter(format string) *Printer {
 
 func (p *Printer) PrintMemories(memories []api.Memory) {
 	if p.Format == "json" {
-		p.printJSON(memories)
+		p.PrintJSON(memories)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (p *Printer) PrintMemories(memories []api.Memory) {
 
 func (p *Printer) PrintMemory(memory *api.Memory) {
 	if p.Format == "json" {
-		p.printJSON(memory)
+		p.PrintJSON(memory)
 		return
 	}
 
@@ -72,7 +72,7 @@ func (p *Printer) PrintMemory(memory *api.Memory) {
 
 func (p *Printer) PrintEntities(entities []api.Entity) {
 	if p.Format == "json" {
-		p.printJSON(entities)
+		p.PrintJSON(entities)
 		return
 	}
 
@@ -93,7 +93,7 @@ func (p *Printer) PrintMessage(msg string) {
 	fmt.Fprintln(p.Writer, msg)
 }
 
-func (p *Printer) printJSON(v any) {
+func (p *Printer) PrintJSON(v any) {
 	data, _ := json.MarshalIndent(v, "", "  ")
 	fmt.Fprintln(p.Writer, string(data))
 }
