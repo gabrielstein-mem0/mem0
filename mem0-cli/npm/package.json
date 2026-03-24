@@ -1,0 +1,19 @@
+{
+  "name": "@mem0ai/cli",
+  "version": "0.1.0",
+  "description": "CLI for the Mem0 Platform",
+  "bin": {
+    "mem0": "./bin/mem0"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mem0ai/mem0.git",
+    "directory": "mem0-cli/npm"
+  },
+  "homepage": "https://mem0.ai",
+  "license": "Apache-2.0",
+  "keywords": ["mem0", "memory", "ai", "cli", "mcp"]
+}

@@ -1,0 +1,52 @@
+version: 2
+project_name: mem0
+
+builds:
+  - main: ./main.go
+    binary: mem0
+    ldflags:
+      - -s -w
+      - -X github.com/mem0ai/mem0/mem0-cli/cmd.version={{.Version}}
+      - -X github.com/mem0ai/mem0/mem0-cli/cmd.commit={{.Commit}}
+      - -X github.com/mem0ai/mem0/mem0-cli/cmd.date={{.Date}}
+      - -X github.com/mem0ai/mem0/mem0-cli/internal/api.version={{.Version}}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - name_template: "mem0_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - src: ../../LICENSE
+        dst: .
+        strip_parent: true
+
+brews:
+  - repository:
+      owner: mem0ai
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://mem0.ai
+    description: "CLI for the Mem0 Platform"
+    install: |
+      bin.install "mem0"
+    test: |
+      system "#{bin}/mem0", "version"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^Merge"
+      - "^docs"
