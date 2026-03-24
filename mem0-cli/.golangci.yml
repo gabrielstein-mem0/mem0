@@ -1,0 +1,17 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - fmt.Fprint
+        - (fmt.State).Write
+        - (*text/tabwriter.Writer).Flush
+        - (*github.com/fatih/color.Color).Fprintf
